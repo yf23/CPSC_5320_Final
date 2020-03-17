@@ -1,8 +1,8 @@
 colorPallate = ({
-    'Base': 'black',
-    'Limit BMI to 18.5 to 25': 'blue',
-    'Sleep for 7 to 9 hours per day': 'green',
-    'Quit smoking': 'red'
+    'Base': '#363433',
+    'Limit BMI to 18.5 to 25': '#1772b4',
+    'Sleep for 7 to 9 hours per day': '#229453',
+    'Quit smoking': '#ee3f4d'
 });
 
 buildColorPicker = function(data) {
@@ -45,7 +45,7 @@ createLegend = function(selector, data) {
         .attr("font-size", 10)
         .selectAll("g")
         .data(colors)
-        .join("g")
+        .join("g");
 
     g.append("rect")
         .attr("x", legendWidth - 20)
@@ -97,10 +97,12 @@ drawLine = function(data, svg, yVar, color, x, y) {
         .datum(data)
         .attr("fill", "none")
         .attr("stroke", color)
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 3.0)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
-        .attr("d", line);
+        .attr("d", line)
+        .style("opacity", 0.5)
+    ;
 
     svg.append("g")
         .attr("fill", color)
@@ -110,7 +112,8 @@ drawLine = function(data, svg, yVar, color, x, y) {
         .data(data)
         .join("circle")
         .attr("transform", d => `translate(${x(d.AGE)},${y(d[yVar])})`)
-        .attr("r", 3)
+        .attr("r", 5)
+        .style("opacity", 0.8)
         .on('mouseover', function(d) {
             d3.select(this)
                 .transition()
@@ -145,10 +148,11 @@ createBoard = function(selector, data, yVar) {
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x).tickValues(d3.map(data_base, d => d.AGE).keys()))
         .call(g => g.select(".tick:last-of-type text").clone()
-            .attr("y", -12)
-            .attr("x", 20)
+            .attr("y", -15)
+            .attr("x", 0)
             .attr("text-anchor", "start")
             .attr("font-weight", "bold")
+            .attr("font-size", "15px")
             .text("AGE")
         );
 
@@ -159,6 +163,7 @@ createBoard = function(selector, data, yVar) {
             .attr("x", 5)
             .attr("text-anchor", "start")
             .attr("font-weight", "bold")
+            .attr("font-size", "15px")
             .text(yVar)
         );
 
@@ -170,6 +175,109 @@ createBoard = function(selector, data, yVar) {
         drawLine(data_topic, svg, yVar, colorPicker[topic], x, y);
     }
 };
+
+getRecommendation = function(data) {
+    let keys = [];
+    let diabetesRisk = [];
+    let sortedDiabetes = [];
+    let cvdRisk = [];
+    let sortedCvd = [];
+    let len = Object.keys(data).length;
+    let recDiabetes;
+    let recCvd;
+    let check = true;
+
+    for (const key of Object.keys(data)) {
+        keys.push(key);
+        console.log(data[key].slice(-1)[0].DIABETES_RISK);
+        diabetesRisk.push(data[key].slice(-1)[0].DIABETES_RISK);
+        sortedDiabetes.push(data[key].slice(-1)[0].DIABETES_RISK);
+        cvdRisk.push(data[key].slice(-1)[0].CVD_RISK);
+        sortedCvd.push(data[key].slice(-1)[0].CVD_RISK);
+    }
+
+    sortedDiabetes.sort();
+    sortedCvd.sort();
+    let minDiabetes = sortedDiabetes[0];
+    let minCvd = sortedCvd[0];
+
+    for(let i = 0; i < len && check; i++) {
+        if (diabetesRisk[i] === minDiabetes) {
+            recDiabetes = keys[i];
+            check = false;
+        }
+    }
+
+    check = true;
+    for(let i = 0; i < len && check; i++) {
+        if(cvdRisk[i] === minCvd) {
+            recCvd = keys[i];
+            check = false;
+        }
+    }
+
+    if (recDiabetes === 'Base') {
+        recDiabetes = 'Keep your original habit';
+    }
+
+    if (recCvd === 'Base') {
+        recCvd = 'Keep your original habit';
+    }
+
+    // Bold rec
+    recDiabetes = "<b>" + recDiabetes + "</b>";
+    recCvd = "<b>" + recCvd + "</b>";
+
+    // Wrap rec
+    recDiabetes = '<p>The best way to reduce diabetes risk: ' + recDiabetes + '</p>';
+    recCvd = '<p>The best way to reduce cardiovascular disease (CVD) risk: ' + recCvd + '</p>';
+    let rec = recDiabetes + recCvd;
+
+    // Add comment
+    let comment1 = "<p>Risk = Disease prevalence in population with selected body measurements and behaviors / Disease prevalence in the U.S.</p>";
+    let comment2 = "<p>Diabetes prevalence in the U.S. = 12.45%; Cardiovascular disease (CVD) prevalence in the U.S. = 8.98%</p>";
+    let comment3 = "<p>Data Source: <a href='https://www.cdc.gov/brfss/index.html'>Behavioral Risk Factor Surveillance System (BRFSS)</a> from CDC</p>";
+    let comments = comment1 + comment2 + comment3;
+
+    // Get recommendation
+    $("#comments").append(comments);
+    $("#recommendation").show().append(rec);
+};
+
+clickSubmit = function() {
+    // Clear chart
+    $('#diabetes_chart').empty();
+    $('#cvd_chart').empty();
+    $('#legend').empty();
+    $('#comments').empty();
+    $('#recommendation').empty();
+
+    // Create Person from click
+    let formResult = {};
+    $("#health_form")
+        .find("form")
+        .serializeArray()
+        .forEach((v, i) => {
+            formResult[v.name] = +v.value;
+        });
+    let person = new Person(
+        formResult.age, formResult.bmi,
+        formResult.sleep, formResult.smoking
+    );
+
+    // Get data from the person
+    let data = person.getAllData(dataRaw);
+    console.log(data);
+
+    // Draw
+    createLegend("#legend", data);
+    createBoard("#diabetes_chart", data, 'DIABETES_RISK');
+    createBoard("#cvd_chart", data, 'CVD_RISK');
+
+    // Recommendation
+    getRecommendation(data);
+};
+
 height = 500;
 width = 900;
 margin = ({top: 20, right: 30, bottom: 30, left: 40});

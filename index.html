@@ -15,133 +15,46 @@
     <div id="title">
         <h1>Health Risks Visualization</h1>
     </div>
-    <div id="content">
-    <div id="health_form">
-        <form>
-            <div>
-                <i>AGE: </i>
-                <label><input name="age" type="text" value="20"></label>
-            </div>
-            <div>
-                <i>BMI:</i><br>
-                <label><input name="bmi" type="radio" value="0"> <i>Underweight (BMI < 18.5)</i></label><br>
-                <label><input name="bmi" type="radio" value="1" checked> <i>Normal (18.5 <= BMI < 25)</i></label><br>
-                <label><input name="bmi" type="radio" value="2"> <i>Overweight (25 <= BMI < 30)</i></label><br>
-                <label><input name="bmi" type="radio" value="3"> <i>Obese (BMI >= 30)</i></label>
-            </div>
-            <div>
-                <i>SLEEP:</i><br>
-                <label><input name="sleep" type="radio" value="0"> <i><7 hours</i></label><br>
-                <label><input name="sleep" type="radio" value="1" checked>> <i>7 to 9 hours</i></label><br>
-                <label><input name="sleep" type="radio" value="2"> <i>>9 hours</i></label><br>
-            </div>
-            <div>
-                <i>SMOKING:</i><br>
-                <label><input name="smoking" type="radio" value="0" checked> <i>No</i></label>
-                <label><input name="smoking" type="radio" value="1"> <i>Yes</i></label><br>
-            </div>
-        </form>
-        <button>Submit</button>
-        <div id="legend"></div>
-    </div>
-    <div id="charts">
-        <div id="diabetes_chart" style="float:left"></div>
-        <div id="cvd_chart" style="float:left"></div>
-        <div id="recommendation" style="float:left; margin-left: 20px"></div>
-    </div>
+        <div id="health_form">
+            <form>
+                <div>
+                    <i>AGE: </i>
+                    <label><input name="age" type="text" value="20"></label>
+                </div>
+                <div>
+                    <i>BMI:</i><br>
+                    <label><input name="bmi" type="radio" value="0"> <i>Underweight (BMI < 18.5)</i></label><br>
+                    <label><input name="bmi" type="radio" value="1" checked> <i>Normal (18.5 <= BMI < 25)</i></label><br>
+                    <label><input name="bmi" type="radio" value="2"> <i>Overweight (25 <= BMI < 30)</i></label><br>
+                    <label><input name="bmi" type="radio" value="3"> <i>Obese (BMI >= 30)</i></label>
+                </div>
+                <div>
+                    <i>SLEEP:</i><br>
+                    <label><input name="sleep" type="radio" value="0"> <i><7 hours</i></label><br>
+                    <label><input name="sleep" type="radio" value="1" checked>> <i>7 to 9 hours</i></label><br>
+                    <label><input name="sleep" type="radio" value="2"> <i>>9 hours</i></label><br>
+                </div>
+                <div>
+                    <i>SMOKING:</i><br>
+                    <label><input name="smoking" type="radio" value="0" checked> <i>No</i></label>
+                    <label><input name="smoking" type="radio" value="1"> <i>Yes</i></label><br>
+                </div>
+            </form>
+            <button>Submit</button>
+            <div id="legend"></div>
+        </div>
+        <div id="charts">
+            <div id="diabetes_chart"></div>
+            <div id="cvd_chart"></div>
+            <div id="comments"></div>
+            <div id="recommendation"></div>
+        </div>
 </body>
+
 <script>
-    getRecommendation = function(obj) {
-
-        var keys = [];
-        var diabetesRisk = [];
-        var sortedDiabetes = [];
-        var cvdRisk = []
-        var sortedCvd = [];
-        var minDiabete;
-        var minCvd;
-        var len = Object.keys(obj).length;
-        var recDiabete;
-        var recCvd;
-        var check = true;
-        var totalRec;
-
-        for(var key in obj) {
-            keys.push(key);
-            console.log(obj[key][6].DIABETES_RISK);
-            diabetesRisk.push(obj[key][6].DIABETES_RISK);
-            sortedDiabetes.push(obj[key][6].DIABETES_RISK);
-            cvdRisk.push(obj[key][6].CVD_RISK);
-            sortedCvd.push(obj[key][6].CVD_RISK);
-        }
-
-        sortedDiabetes.sort();
-        sortedCvd.sort();
-        minDiabete = sortedDiabetes[0];
-        minCvd = sortedCvd[0];
-
-        for(var i = 0; i < len && check; i++) {
-            if(diabetesRisk[i] == minDiabete) {
-                recDiabete = keys[i];
-                check = false;
-            }
-        }
-
-        check = true;
-        for(var i = 0; i < len && check; i++) {
-            if(cvdRisk[i] == minCvd) {
-                recCvd = keys[i];
-                check = false;
-            }
-        }
-        
-        if(recDiabete == 'Base') {
-            recDiabete = 'Please keep your original habit';
-        }
-
-        if(recCvd == 'Base') {
-            recCvd = 'Please keep your original habit';
-        }
-
-        totalRec = 'The best way to reduce diabetes risk: ' + recDiabete + '; ' + 'The best way to reduce CVD risk: ' + recCvd + '<br>';
-
-        // Get recommendation
-        $("#recommendation").append(totalRec);
-    };
-
-    clickSubmit = function() {
-        // Clear chart
-        $('#diabetes_chart').empty();
-        $('#cvd_chart').empty();
-        $('#legend').empty();
-        $('#recommendation').empty();
-
-        // Create Person from click
-        let formResult = {};
-        $("#health_form")
-            .find("form")
-            .serializeArray()
-            .forEach((v, i) => {
-                formResult[v.name] = +v.value;
-            });
-        let person = new Person(
-            formResult.age, formResult.bmi,
-            formResult.sleep, formResult.smoking
-        );
-
-        // Get data from the person
-        let data = person.getAllData(dataRaw);
-        console.log(data);
-        // Draw
-        createLegend("#legend", data);
-        createBoard("#diabetes_chart", data, 'DIABETES_RISK');
-        createBoard("#cvd_chart", data, 'CVD_RISK');
-
-        getRecommendation(data);
-    };
-
     // Bind submit form function onclick
     $(document).ready(function() {
+        $("#recommendation").hide();
         $("#health_form").find("button").click(clickSubmit);
     });
 </script>

@@ -36,3 +36,17 @@
     float: right;
     width: 49%;
 }
+
+#comments {
+    float:left;
+    margin-left: 20px;
+    text-align: left;
+}
+
+#recommendation {
+    float:left;
+    margin-left: 20px;
+    text-align: left;
+    border: 1px solid #000;
+    padding: 15px;
+}

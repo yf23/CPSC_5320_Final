@@ -57,7 +57,4 @@ class Person {
         }
         return all_data;
     }
-
-    // Statical method, return the real age on age value
-    static getRealAge(age) { return 20 + 10 * age; }
 }
