@@ -44,17 +44,70 @@
         <button>Submit</button>
         <div id="legend"></div>
     </div>
-
     <div id="charts">
-
-        <div id="diabetes_chart"></div>
-        <div id="cvd_chart"></div>
-        <div id="recommendation"></div>
+        <div id="diabetes_chart" style="float:left"></div>
+        <div id="cvd_chart" style="float:left"></div>
+        <div id="recommendation" style="float:left; margin-left: 20px"></div>
     </div>
-    </div>
-
 </body>
 <script>
+    getRecommendation = function(obj) {
+
+        var keys = [];
+        var diabetesRisk = [];
+        var sortedDiabetes = [];
+        var cvdRisk = []
+        var sortedCvd = [];
+        var minDiabete;
+        var minCvd;
+        var len = Object.keys(obj).length;
+        var recDiabete;
+        var recCvd;
+        var check = true;
+        var totalRec;
+
+        for(var key in obj) {
+            keys.push(key);
+            console.log(obj[key][6].DIABETES_RISK);
+            diabetesRisk.push(obj[key][6].DIABETES_RISK);
+            sortedDiabetes.push(obj[key][6].DIABETES_RISK);
+            cvdRisk.push(obj[key][6].CVD_RISK);
+            sortedCvd.push(obj[key][6].CVD_RISK);
+        }
+
+        sortedDiabetes.sort();
+        sortedCvd.sort();
+        minDiabete = sortedDiabetes[0];
+        minCvd = sortedCvd[0];
+
+        for(var i = 0; i < len && check; i++) {
+            if(diabetesRisk[i] == minDiabete) {
+                recDiabete = keys[i];
+                check = false;
+            }
+        }
+
+        check = true;
+        for(var i = 0; i < len && check; i++) {
+            if(cvdRisk[i] == minCvd) {
+                recCvd = keys[i];
+                check = false;
+            }
+        }
+        
+        if(recDiabete == 'Base') {
+            recDiabete = 'Please keep your original habit';
+        }
+
+        if(recCvd == 'Base') {
+            recCvd = 'Please keep your original habit';
+        }
+
+        totalRec = 'The best way to reduce diabetes risk: ' + recDiabete + '; ' + 'The best way to reduce CVD risk: ' + recCvd + '<br>';
+
+        // Get recommendation
+        $("#recommendation").append(totalRec);
+    };
 
     clickSubmit = function() {
         // Clear chart
@@ -84,8 +137,7 @@
         createBoard("#diabetes_chart", data, 'DIABETES_RISK');
         createBoard("#cvd_chart", data, 'CVD_RISK');
 
-        // Get recommendation
-        $("#recommendation").append("Recommendations here");
+        getRecommendation(data);
     };
 
     // Bind submit form function onclick
