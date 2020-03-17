@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.js"></script>
+<script src="Person.js"></script>
+<script src="Data.js"></script>
+<script src="Plot.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title>CPSC 5320 Final Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="title">
+        <h1>Health Risks Visualization</h1>
+    </div>
+    <div id="content">
+    <div id="health_form">
+        <form>
+            <div>
+                <i>AGE: </i>
+                <label><input name="age" type="text" value="20"></label>
+            </div>
+            <div>
+                <i>BMI:</i><br>
+                <label><input name="bmi" type="radio" value="0"> <i>Underweight (BMI < 18.5)</i></label><br>
+                <label><input name="bmi" type="radio" value="1" checked> <i>Normal (18.5 <= BMI < 25)</i></label><br>
+                <label><input name="bmi" type="radio" value="2"> <i>Overweight (25 <= BMI < 30)</i></label><br>
+                <label><input name="bmi" type="radio" value="3"> <i>Obese (BMI >= 30)</i></label>
+            </div>
+            <div>
+                <i>SLEEP:</i><br>
+                <label><input name="sleep" type="radio" value="0"> <i><7 hours</i></label><br>
+                <label><input name="sleep" type="radio" value="1" checked>> <i>7 to 9 hours</i></label><br>
+                <label><input name="sleep" type="radio" value="2"> <i>>9 hours</i></label><br>
+            </div>
+            <div>
+                <i>SMOKING:</i><br>
+                <label><input name="smoking" type="radio" value="0" checked> <i>No</i></label>
+                <label><input name="smoking" type="radio" value="1"> <i>Yes</i></label><br>
+            </div>
+        </form>
+        <button>Submit</button>
+        <div id="legend"></div>
+    </div>
+
+    <div id="charts">
+
+        <div id="diabetes_chart"></div>
+        <div id="cvd_chart"></div>
+        <div id="recommendation"></div>
+    </div>
+    </div>
+
+</body>
+<script>
+
+    clickSubmit = function() {
+        // Clear chart
+        $('#diabetes_chart').empty();
+        $('#cvd_chart').empty();
+        $('#legend').empty();
+        $('#recommendation').empty();
+
+        // Create Person from click
+        let formResult = {};
+        $("#health_form")
+            .find("form")
+            .serializeArray()
+            .forEach((v, i) => {
+                formResult[v.name] = +v.value;
+            });
+        let person = new Person(
+            formResult.age, formResult.bmi,
+            formResult.sleep, formResult.smoking
+        );
+
+        // Get data from the person
+        let data = person.getAllData(dataRaw);
+        console.log(data);
+        // Draw
+        createLegend("#legend", data);
+        createBoard("#diabetes_chart", data, 'DIABETES_RISK');
+        createBoard("#cvd_chart", data, 'CVD_RISK');
+
+        // Get recommendation
+        $("#recommendation").append("Recommendations here");
+    };
+
+    // Bind submit form function onclick
+    $(document).ready(function() {
+        $("#health_form").find("button").click(clickSubmit);
+    });
+</script>
+</html>

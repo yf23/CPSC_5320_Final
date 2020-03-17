@@ -1,0 +1,38 @@
+#title {
+    color: #111;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    line-height: 1;
+    text-align: center;
+}
+
+#content  {
+    margin: 0 auto;
+}
+
+#health_form {
+    float: left;
+    width: 20%;
+    border: 1px solid #000;
+    display: inline-block;
+}
+
+#charts {
+    text-align: center;
+    float: right;
+    height: 650px;
+    width: 79%;
+    display: inline-block;
+}
+
+#diabetes_chart {
+    float: left;
+    width: 49%;
+}
+
+#cvd_chart {
+    float: right;
+    width: 49%;
+}
